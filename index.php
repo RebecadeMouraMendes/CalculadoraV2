@@ -1,3 +1,94 @@
+<?php
+$currentValue = 0;
+
+$input = [];
+
+
+function getInputAsString($values){
+	$o = "";
+	foreach ($values as $value){
+		$o .= $value;
+	}
+	return $o;
+}
+
+
+function calculateInput($userInput){
+    $arr = [];
+    $char = "";
+    foreach ($userInput as $num){
+        if(is_numeric($num) || $num == "."){
+            $char .= $num;
+        }else if(!is_numeric($num)){
+            if(!empty($char)){
+                $arr[] = $char;
+                $char = "";
+            }
+            $arr[] = $num;
+        }
+    }
+    if(!empty($char)){
+        $arr[] = $char;
+    }
+    // calculate user input
+
+    $current = 0;
+    $action = null;
+    for($i=0; $i<= count($arr)-1; $i++){
+        if(is_numeric($arr[$i])){
+            if($action){
+                if($action == "+"){
+                    $current = $current + $arr[$i];
+                }
+                if($action == "-"){
+                    $current = $current - $arr[$i];
+                }
+                if($action == "*"){
+                    $current = $current * $arr[$i];
+                }
+                if($action == "/"){
+                    $current = $current / $arr[$i];
+				}
+                $action = null;
+            }else{
+                if($current == 0){
+                    $current = $arr[$i];
+                }
+            }
+        }else{
+            $action = $arr[$i];
+        }
+    }
+    return $current;
+
+}
+
+$rep="";
+
+if($_SERVER['REQUEST_METHOD'] == "POST"){
+    if(isset($_POST['input'])){
+        $input = json_decode($_POST['input']);
+	}
+
+
+    if(isset($_POST)){
+		
+        foreach ($_POST as $key=>$value){
+            if($key == '='){
+               $currentValue = calculateInput($input);
+               $input = [];
+               $input[] = $currentValue;
+            }elseif($key == "c"){
+                $input = [];
+                $currentValue = 0;
+            }elseif($key != 'input'){
+                $input[] = $value;
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,49 +104,50 @@
     <div class="row">
         <div class="col">
         <br><h1>Calculadora</h1><br>
-        <form name="calculadora" method="POST" action="">
+        <form name="calculadora" method="post" action="" value="<?php echo $currentValue;?>">
         <div class="container text-center">
-        <div class="card gap-2 col-4 mx-auto" >
+<div class="card gap-2 col-4 mx-auto" >
+  <div class="card-body" >
+  <input class="border-0" style="card-body" value="<?php echo getInputAsString($input);?>">
+    <input class="card-body"  type="hidden" name="input" value='<?php echo json_encode($input);?>'/>
 
-  <div class="card-body" style="">
-    This is some text within a card body.
   </div>
 </div>
     <div class="gap-2 col-4 mx-auto" style="background-color:LightGray">
   <div class="row">
   <div class="col">
   <br>
-  <button type="submit" class="btn btn-warning col-2" name="soma" value="Submit1">C</button> 
-  <button type="submit" class="btn btn-light col-2" name="soma" value="Submit1">+</button> 
-  <button type="submit" class="btn btn-light col-2" name="soma" value="Submit1">-</button> 
-  <button type="submit" class="btn btn-light col-2" name="soma" value="Submit1">/</button> 
+  <button type="submit" class="btn btn-warning col-2" name="c" value="c">C</button> 
+  <button type="submit" class="btn btn-light col-2" name="+" value="+">+</button> 
+  <button type="submit" class="btn btn-light col-2" name="-" value="-">-</button> 
+  <button type="submit" class="btn btn-light col-2" name="/" value="/">/</button> 
 </div>
   </div>
   <div class="row">
   <div class="col">
   <br> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">7</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">8</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">9</button> 
-  <button type="submit" class="btn btn-light col-2" name="soma" value="Submit1">*</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="7" value="7">7</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="8" value="8">8</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="9" value="9">9</button> 
+  <button type="submit" class="btn btn-light col-2" name="*-" value="*">*</button> 
 </div>
   </div>
   <br> 
   <div class="row">
   <div class="col">
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">4</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">5</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">4</button> 
-  <button type="submit" class="btn btn-success col-2" name="soma" value="Submit1">=</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="4" value="4">4</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="5" value="5">5</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="4" value="4">4</button> 
+  <button type="submit" class="btn btn-success col-2" name="=" value="=">=</button> 
 </div>
   </div>
   <br> 
   <div class="row">
   <div class="col">
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">3</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">2</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">1</button> 
-  <button type="submit" class="btn btn-secondary col-2" name="soma" value="Submit1">0</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="3" value="3">3</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="2" value="2">2</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="1" value="1">1</button> 
+  <button type="submit" class="btn btn-secondary col-2" name="0" value="0">0</button> 
 </div>
   </div>
   <br> <br>
@@ -64,31 +156,6 @@
 
 
         </form>
-
-        <?php
-        if(isset($_POST['priNum']) && isset($_POST['segNum'])){
-        $priNum = $_POST['priNum'];
-        $segNum = $_POST['segNum'];
-        }
-        
-        if (isset($_POST['soma'])){
-            ?> <br> <?php
-            echo "<h3>A soma de ".$priNum ." + " .$segNum. " é igual a ". $priNum + $segNum; 
-        }
-        if (isset($_POST['sub'])){
-            ?> <br> <?php
-            echo "<h3> A subtração de ".$priNum ." - " .$segNum. " é igual a ". $priNum - $segNum;
-            echo "<h3> A subtração de ".$segNum ." - " .$priNum. " é igual a ". $segNum - $priNum;
-        }
-        if (isset($_POST['mul'])){
-            ?> <br> <?php
-            echo "<h3> A multiplicação de ".$priNum ." x " .$segNum. " é igual a ". $priNum * $segNum;
-        }
-         if (isset($_POST['div'])){
-            ?> <br> <?php
-            echo "<h3> A divisão de ".$priNum ." / " .$segNum. " é igual a ". $priNum / $segNum;
-            echo "<h3> A divisão de ".$segNum ." / " .$priNum. " é igual a ". $segNum / $priNum;
-        } ?>
         </div>
     </div>
     </div>
